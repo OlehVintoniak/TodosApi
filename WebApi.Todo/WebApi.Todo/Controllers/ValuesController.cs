@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
+using WebApi.Todo.Database;
 
 namespace WebApi.Todo.Controllers
 {
@@ -7,11 +9,20 @@ namespace WebApi.Todo.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
+        private readonly AppDbContext _db;
+
+        public ValuesController(AppDbContext context)
+        {
+            _db = context;
+        }
         // GET api/values
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
-            return new string[] { "value1 test test test", "value2222323123312" };
+            //return new string[] { "value1 test test test", "value2222323123312" };
+            return (_db.Roles.Select(r => r.Name).ToList().Count == 0)
+                ? new List<string> {"Empty"}
+                : _db.Roles.Select(r => r.Name).ToList();
         }
 
         // GET api/values/5

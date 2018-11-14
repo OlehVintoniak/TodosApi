@@ -12,9 +12,6 @@ namespace WebApi.Todo.Models
 
         public static void SetupKeys(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<UserRole>()
-                .HasKey(ur => new { ur.RoleId, ur.UserId })
-                .ForSqlServerIsClustered();
         }
 
         public static void SetupRelations(ModelBuilder modelBuilder)
