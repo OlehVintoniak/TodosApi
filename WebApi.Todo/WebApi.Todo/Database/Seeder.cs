@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 using WebApi.Todo.Constants;
 using WebApi.Todo.Models;
@@ -9,69 +7,41 @@ namespace WebApi.Todo.Database
 {
     public class Seeder
     {
-        readonly AppDbContext _context;
-
-        public Seeder(AppDbContext context)
+        private readonly UserManager<User> _userManager;
+        private readonly RoleManager<Role> _roleManager;
+        public Seeder(UserManager<User> userManager, RoleManager<Role> roleManager)
         {
-            _context = context;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
-        public async Task Seed()
+        public async Task InitializeAsync()
         {
-            Console.WriteLine("Seeding...");
-
-            if (!_context.Roles.Any())
+            var adminEmail = "admin@gmail.com";
+            var password = "1z1z1zZ_";
+            if (await _roleManager.FindByNameAsync(Roles.Admin) == null)
             {
-                var roles = new List<Role> {
-                    new Role
-                    {
-                        Name = Roles.Admin
-                    },
-                    new Role
-                    {
-                        Name = Roles.User
-                    }
-                };
-
-                _context.AddRange(roles);
-                _context.SaveChanges();
+                await _roleManager.CreateAsync(new Role{ Name = Roles.Admin});
             }
-
-            if (!_context.Users.Any())
+            if (await _roleManager.FindByNameAsync(Roles.User) == null)
+            {
+                await _roleManager.CreateAsync(new Role { Name = Roles.User });
+            }
+            if (await _userManager.FindByNameAsync(adminEmail) == null)
             {
                 var admin = new User
                 {
-                    Email = "admin@gmail.com",
+                    Email = adminEmail,
+                    UserName = adminEmail,
                     FirstName = "System",
-                    LastName = "Admin",
+                    LastName = "Admin"
                 };
-                admin.UserName = admin.Email;
-
-                _context.Users.Add(admin);
-                _context.SaveChanges();
-
-                var adminRole = _context.Roles.FirstOrDefault(x => x.Name == Roles.Admin);
-                var userRole = _context.Roles.FirstOrDefault(x => x.Name == Roles.User);
-
-                var userRoles = new List<UserRole>();
-                if (adminRole != null && userRole != null)
+                var result = await _userManager.CreateAsync(admin, password);
+                if (result.Succeeded)
                 {
-                    userRoles.AddRange(new List<UserRole>
-                    {
-                        new UserRole
-                        {
-                            RoleId = adminRole.Id,
-                            UserId = admin.Id
-                        },
-                        new UserRole {
-                            RoleId = userRole.Id,
-                            UserId = admin.Id
-                        }
-                    });
+                    await _userManager.AddToRoleAsync(admin, Roles.Admin);
+                    await _userManager.AddToRoleAsync(admin, Roles.User);
                 }
-                _context.AddRange(userRoles);
-
-                await _context.SaveChangesAsync();
             }
         }
     }

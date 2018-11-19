@@ -118,7 +118,8 @@ namespace WebApi.Todo
             }
 
             // Seed the database
-            seeder.Seed().Wait();
+            seeder.InitializeAsync().Wait();
+            
 
             app.UseAuthentication();
             app.UseHttpsRedirection();
