@@ -43,8 +43,9 @@ namespace WebApi.Todo.Database
                 {
                     Email = "admin@gmail.com",
                     FirstName = "System",
-                    LastName = "Admin"
+                    LastName = "Admin",
                 };
+                admin.UserName = admin.Email;
 
                 _context.Users.Add(admin);
                 _context.SaveChanges();
