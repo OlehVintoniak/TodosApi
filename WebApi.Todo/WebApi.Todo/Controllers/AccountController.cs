@@ -15,15 +15,14 @@ using WebApi.Todo.ViewModels;
 
 namespace WebApi.Todo.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class AccountController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
 
-        public AccountController(UserManager<User> userManager,
-            SignInManager<User> signInManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -62,6 +61,26 @@ namespace WebApi.Todo.Controllers
             Response.ContentType = "application/json";
             await Response.WriteAsync(JsonConvert.SerializeObject(response,
                 new JsonSerializerSettings { Formatting = Formatting.Indented }));
+        }
+
+        [HttpPost]
+        public async Task<object> Register([FromBody] RegisterViewModel model)
+        {
+            var user = new User
+            {
+                UserName = model.Email,
+                Email = model.Email
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (!result.Succeeded)
+            {
+                throw new ApplicationException("UNKNOWN_ERROR");
+            }
+
+            await _userManager.AddToRoleAsync(user, Roles.User);
+            return Ok();
         }
 
         #region Helpers
