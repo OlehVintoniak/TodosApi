@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using WebApi.Todo.Models.Abstract;
 
 namespace WebApi.Todo.Models

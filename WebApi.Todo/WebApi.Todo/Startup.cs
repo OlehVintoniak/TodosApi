@@ -36,6 +36,7 @@ namespace WebApi.Todo
             services.AddScoped<AppDbContext>();
 
             // Configure services
+            services.AddScoped<IUserWrapper, UserWrapper>();
             services.AddTransient<IUserService, UserService>();
 
             // Configure Db Seeder
