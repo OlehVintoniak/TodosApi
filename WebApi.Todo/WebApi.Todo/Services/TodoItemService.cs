@@ -50,6 +50,7 @@ namespace WebApi.Todo.Services
             await _context.SaveChangesAsync();
 
             model.Id = todoItemToCreate.Id;
+            model.CreatedAt = todoItemToCreate.CreatedAt;
             return model;
         }
 
@@ -67,7 +68,14 @@ namespace WebApi.Todo.Services
             }
 
             await _context.SaveChangesAsync();
-            return model;
+
+            return new TodoItemViewModel
+            {
+                CreatedAt = todoItemToUpdate.CreatedAt,
+                Id = todoItemToUpdate.Id,
+                Description = todoItemToUpdate.Description,
+                Status = todoItemToUpdate.Status
+            };
         }
 
         public async Task DeleteTodoItemById(long id)

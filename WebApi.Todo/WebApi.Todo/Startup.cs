@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using WebApi.Todo.Auth;
 using WebApi.Todo.Database;
 using WebApi.Todo.Interfaces;
+using WebApi.Todo.Middlewares;
 using WebApi.Todo.Models;
 using WebApi.Todo.Services;
 
@@ -37,6 +38,7 @@ namespace WebApi.Todo
 
             // Configure services
             services.AddScoped<IUserWrapper, UserWrapper>();
+            services.AddScoped<ITodoService, TodoItemService>();
             services.AddTransient<IUserService, UserService>();
 
             // Configure Db Seeder
@@ -120,8 +122,8 @@ namespace WebApi.Todo
 
             // Seed the database
             seeder.InitializeAsync().Wait();
-            
 
+            app.UseCustomExceptionHandler();
             app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseMvcWithDefaultRoute();
