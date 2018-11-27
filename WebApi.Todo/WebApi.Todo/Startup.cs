@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Tasks;
+using Swashbuckle.AspNetCore.Swagger;
 using WebApi.Todo.Auth;
 using WebApi.Todo.Database;
 using WebApi.Todo.Interfaces;
@@ -92,6 +93,12 @@ namespace WebApi.Todo
                     };
                 });
 
+            // Configure Swagger
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "Todo Api", Version = "v1" });
+            });
+
             // Configure CORS policy
             services.AddCors(options =>
             {
@@ -123,6 +130,16 @@ namespace WebApi.Todo
             // Seed the database
             seeder.InitializeAsync().Wait();
 
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("../swagger/v1/swagger.json", "My API V1");
+            });
+            
             app.UseCustomExceptionHandler();
             app.UseAuthentication();
             app.UseHttpsRedirection();
