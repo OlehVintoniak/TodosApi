@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using WebApi.Todo.Models;
 using WebApi.Todo.ViewModels;
 
 namespace WebApi.Todo.Interfaces
@@ -11,6 +12,8 @@ namespace WebApi.Todo.Interfaces
         Task<TodoItemViewModel> CreateTodoItem(TodoItemViewModel model);
 
         Task<TodoItemViewModel> UpdateTodoItem(TodoItemViewModel model);
+
+        Task<TodoItemViewModel> ChangeStatus(long id, TodoItemStatus status);
 
         Task DeleteTodoItemById(long id);
     }

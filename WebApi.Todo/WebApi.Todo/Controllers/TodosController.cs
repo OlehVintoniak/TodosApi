@@ -39,6 +39,14 @@ namespace WebApi.Todo.Controllers
             return Ok(response);
         }
 
+        [HttpPut]
+        [Route("changeStatus")]
+        public async Task<IActionResult> ChangeStatus([FromBody]ChangeStatusViewModel statusModel)
+        {
+            var response = await _todoService.ChangeStatus(statusModel.TodoItemId, statusModel.Status);
+            return Ok(response);
+        }
+
         [HttpDelete("{id:long}")]
         public async Task<IActionResult> Delete(long id)
         {

@@ -45,49 +45,66 @@ namespace WebApi.Todo.Services
                 Status = TodoItemStatus.New,
                 UserId = _userWrapper.Id
             };
-
             _context.TodoItems.Add(todoItemToCreate);
             await _context.SaveChangesAsync();
-
-            model.Id = todoItemToCreate.Id;
-            model.CreatedAt = todoItemToCreate.CreatedAt;
-            return model;
+            return TransformToView(todoItemToCreate);
         }
 
         public async Task<TodoItemViewModel> UpdateTodoItem(TodoItemViewModel model)
         {
-            var todoItemToUpdate = await _context.TodoItems.FirstOrDefaultAsync(t => t.Id == model.Id);
-            if (todoItemToUpdate == null)
-            {
-                throw new Exception("Todo item was not found");
-            }
+            var todoItemToUpdate = await GetTodoItemOfCurrentUserById(model.Id);
 
             if (!string.IsNullOrWhiteSpace(model.Description))
             {
                 todoItemToUpdate.Description = model.Description;
             }
-
             await _context.SaveChangesAsync();
+            return TransformToView(todoItemToUpdate);
+        }
 
-            return new TodoItemViewModel
+        public async Task<TodoItemViewModel> ChangeStatus(long id, TodoItemStatus status)
+        {
+            var todoItemToChangeStatus = await GetTodoItemOfCurrentUserById(id);
+
+            if (Enum.IsDefined(typeof(TodoItemStatus), status))
             {
-                CreatedAt = todoItemToUpdate.CreatedAt,
-                Id = todoItemToUpdate.Id,
-                Description = todoItemToUpdate.Description,
-                Status = todoItemToUpdate.Status
-            };
+                todoItemToChangeStatus.Status = status;
+            }
+            else
+            {
+                throw new Exception("Status not defined");
+            }
+            await _context.SaveChangesAsync();
+            return TransformToView(todoItemToChangeStatus);
         }
 
         public async Task DeleteTodoItemById(long id)
         {
-            var todoItemToDelete = await _context.TodoItems.FirstOrDefaultAsync(t => t.Id == id);
-            if (todoItemToDelete == null)
+            var todoItemToDelete = await GetTodoItemOfCurrentUserById(id);
+            _context.TodoItems.Remove(todoItemToDelete);
+            await _context.SaveChangesAsync();
+        }
+
+        private TodoItemViewModel TransformToView(TodoItem todoItem)
+        {
+            return new TodoItemViewModel
+            {
+                CreatedAt = todoItem.CreatedAt,
+                Id = todoItem.Id,
+                Description = todoItem.Description,
+                Status = todoItem.Status
+            };
+        }
+
+        private async Task<TodoItem> GetTodoItemOfCurrentUserById(long id)
+        {
+            var todoItem = await _context.TodoItems
+                .FirstOrDefaultAsync(t => t.Id == id && t.UserId == _userWrapper.Id);
+            if (todoItem == null)
             {
                 throw new Exception("Todo item was not found");
             }
-
-            _context.TodoItems.Remove(todoItemToDelete);
-            await _context.SaveChangesAsync();
+            return todoItem;
         }
     }
 }
