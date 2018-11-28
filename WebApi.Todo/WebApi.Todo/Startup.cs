@@ -9,7 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Threading.Tasks;
-using Swashbuckle.AspNetCore.Swagger;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using WebApi.Todo.Auth;
 using WebApi.Todo.Database;
 using WebApi.Todo.Interfaces;
@@ -30,7 +31,14 @@ namespace WebApi.Todo
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvcCore()
+                .AddJsonFormatters(settings => {
+                    settings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                    settings.DateFormatString = "MM/dd/yyyy";
+                });
+
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // Configure Db Context
             var connection = Configuration.GetConnectionString("Default");
@@ -94,10 +102,7 @@ namespace WebApi.Todo
                 });
 
             // Configure Swagger
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info { Title = "Todo Api", Version = "v1" });
-            });
+            services.AddSwaggerDocumentation();
 
             // Configure CORS policy
             services.AddCors(options =>
@@ -130,17 +135,10 @@ namespace WebApi.Todo
             // Seed the database
             seeder.InitializeAsync().Wait();
 
-            // Enable middleware to serve generated Swagger as a JSON endpoint.
-            app.UseSwagger();
-
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
-            // specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("../swagger/v1/swagger.json", "My API V1");
-            });
+            app.UseSwaggerDocumentation();
             
             app.UseCustomExceptionHandler();
+
             app.UseAuthentication();
             app.UseHttpsRedirection();
             app.UseMvcWithDefaultRoute();
